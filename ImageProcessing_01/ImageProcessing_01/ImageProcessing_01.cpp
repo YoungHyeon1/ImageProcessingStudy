@@ -1,16 +1,67 @@
 ﻿// ImageProcessing_01.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
-//
+// 학번: 201995020
+// 학과: 컴퓨터 소프트웨어 공학부
+// 이름: 김영현
+
 #include<opencv2/opencv.hpp>
 #include <iostream>
 
 using namespace cv;
 using namespace std;
 
+
+int mx1, my1, mx2, my2;
+bool cropping = false;
+string image_path = "D:/chrome_download/Lenna.jpg";
+string result_path = "D:/result.jpg";
+Rect rect;
+
+Rect getPositiveRect(int x1, int y1, int x2, int y2) {
+    return Rect(min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1));
+}
+
+
+void onMouse(int event, int x, int y, int flags, void* param) {
+    Mat* image = (Mat*)param;
+    Mat temp_image = image->clone();
+    if (event == EVENT_LBUTTONDOWN) {
+        if (!cropping) {
+            cout << "new rect" << endl;
+        }
+        cropping = true;
+        rect = Rect(x, y, 0, 0);
+    }
+    else if (event == EVENT_MOUSEMOVE) {
+        if (cropping) {
+            *image = imread(image_path);
+            rectangle(temp_image, getPositiveRect(rect.x, rect.y, x, y), Scalar(0, 255, 0), 2);
+            imshow("image", temp_image);
+        }
+    }
+    else if (event == EVENT_LBUTTONUP) {
+        cropping = false;
+        rectangle(*image, getPositiveRect(rect.x, rect.y, x, y), Scalar(0, 255, 0), 2);
+        imshow("image", *image);
+        rect = getPositiveRect(rect.x, rect.y, x, y);
+    }
+}
+
+
 int main()
 {
-    Mat image;
-
-    std::cout << "Hello World!\n";
+    Mat img, roi;
+    img = imread(image_path);
+    imshow("image", img);
+    Mat clone = img.clone();
+    setMouseCallback("image", onMouse, &img);
+    while (1) {
+        int key = waitKey(100);
+        if (key == 'q')break;
+        else if (key == 'c') {
+            roi = clone(rect);
+            imwrite(result_path, roi);
+        }
+    }
 }
 
 // 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴
