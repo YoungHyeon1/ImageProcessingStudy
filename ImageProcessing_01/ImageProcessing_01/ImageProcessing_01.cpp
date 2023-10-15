@@ -25,9 +25,6 @@ void onMouse(int event, int x, int y, int flags, void* param) {
     Mat* image = (Mat*)param;
     Mat temp_image = image->clone();
     if (event == EVENT_LBUTTONDOWN) {
-        if (!cropping) {
-            cout << "new rect" << endl;
-        }
         cropping = true;
         rect = Rect(x, y, 0, 0);
     }
